@@ -4,19 +4,14 @@ import {
   LayoutDashboard,
   ReceiptText,
   PlusCircle,
-  Tags,
   PiggyBank,
   PieChart,
   FileSpreadsheet,
   Repeat,
-  Bell,
-  User,
   Settings,
   Wallet,
   X,
   Target,
-  Sparkles,
-  Users,
   ScanLine,
 } from 'lucide-react';
 
@@ -25,15 +20,11 @@ const navItems = [
   { name: 'Transactions', path: '/transactions', icon: ReceiptText },
   { name: 'Add Transaction', path: '/transactions/add', icon: PlusCircle },
   { name: 'Receipt Scanner', path: '/receipt-scanner', icon: ScanLine },
-  { name: 'Categories', path: '/categories', icon: Tags },
   { name: 'Budgets', path: '/budgets', icon: PiggyBank },
   { name: 'Analytics', path: '/analytics', icon: PieChart },
   { name: 'Savings Goals', path: '/goals', icon: Target },
-  { name: 'AI Assistant', path: '/ai-assistant', icon: Sparkles },
-  { name: 'Shared Expenses', path: '/shared-expenses', icon: Users },
   { name: 'Recurring Bills', path: '/recurring', icon: Repeat },
   { name: 'Reports', path: '/reports', icon: FileSpreadsheet },
-  { name: 'Notifications', path: '/notifications', icon: Bell },
   { name: 'Settings', path: '/settings', icon: Settings },
 ];
 
@@ -106,15 +97,12 @@ export const Sidebar = ({ isOpen, closeSidebar }) => {
 
         {/* Sidebar Footer */}
         <div className="p-4 border-t border-slate-100 dark:border-slate-800">
-          <div className="p-3 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-              <span className="text-xs font-bold text-indigo-900 dark:text-indigo-200">
-                AI Financial Copilot
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-              Ask questions and get instant personalized spending tips.
+          <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60">
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+              SpendWise v1.0
+            </span>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              Smart Personal Expense & Budget Management
             </p>
           </div>
         </div>

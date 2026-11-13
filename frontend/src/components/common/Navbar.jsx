@@ -4,7 +4,6 @@ import { useTheme } from '../../context/ThemeContext';
 import {
   Sun,
   Moon,
-  Bell,
   Menu,
   User,
   LogOut,
@@ -50,16 +49,6 @@ export const Navbar = ({ toggleSidebar }) => {
         >
           {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5 text-amber-400" />}
         </button>
-
-        {/* Notifications Icon Link */}
-        <Link
-          to="/notifications"
-          className="relative p-2 rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 transition-colors"
-          title="Notifications"
-        >
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full animate-pulse"></span>
-        </Link>
 
         {/* User Profile Dropdown */}
         <div className="relative">
