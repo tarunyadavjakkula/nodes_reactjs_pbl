@@ -130,13 +130,6 @@ export const TransactionsPage = () => {
         </div>
         <div className="flex items-center gap-2">
           <Link
-            to="/categories"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
-          >
-            <Tags className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-            <span>Manage Categories</span>
-          </Link>
-          <Link
             to="/transactions/add"
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all"
           >

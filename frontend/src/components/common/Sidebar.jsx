@@ -18,7 +18,6 @@ import {
 const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { name: 'Transactions', path: '/transactions', icon: ReceiptText },
-  { name: 'Add Transaction', path: '/transactions/add', icon: PlusCircle },
   { name: 'Receipt Scanner', path: '/receipt-scanner', icon: ScanLine },
   { name: 'Budgets', path: '/budgets', icon: PiggyBank },
   { name: 'Analytics', path: '/analytics', icon: PieChart },
