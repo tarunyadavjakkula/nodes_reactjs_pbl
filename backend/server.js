@@ -14,10 +14,7 @@ import budgetRoutes from './routes/budgetRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import recurringRoutes from './routes/recurringRoutes.js';
-import notificationRoutes from './routes/notificationRoutes.js';
 import goalRoutes from './routes/goalRoutes.js';
-import sharedExpenseRoutes from './routes/sharedExpenseRoutes.js';
-import aiRoutes from './routes/aiRoutes.js';
 import receiptRoutes from './routes/receiptRoutes.js';
 
 dotenv.config();
@@ -62,10 +59,7 @@ app.use('/api/budgets', budgetRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/recurring', recurringRoutes);
-app.use('/api/notifications', notificationRoutes);
 app.use('/api/goals', goalRoutes);
-app.use('/api/shared-groups', sharedExpenseRoutes);
-app.use('/api/ai', aiRoutes);
 app.use('/api/receipts', receiptRoutes);
 
 // Root informational endpoint
