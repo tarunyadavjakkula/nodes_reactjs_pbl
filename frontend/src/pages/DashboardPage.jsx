@@ -59,7 +59,7 @@ export const DashboardPage = () => {
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Welcome back, {user?.name || 'User'}. Here is your financial overview in{' '}
             <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-              {user?.currency || 'USD'}
+              {user?.currency || 'INR'}
             </span>
             .
           </p>

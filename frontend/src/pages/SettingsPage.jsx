@@ -7,7 +7,7 @@ import api from '../services/api';
 export const SettingsPage = () => {
   const { theme, toggleTheme } = useTheme();
   const { user, updateUser } = useAuth();
-  const [selectedCurrency, setSelectedCurrency] = useState(user?.currency || 'USD');
+  const [selectedCurrency, setSelectedCurrency] = useState(user?.currency || 'INR');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');

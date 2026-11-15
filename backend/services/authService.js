@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
 
-export const registerUser = async ({ name, email, password, currency = 'USD' }) => {
+export const registerUser = async ({ name, email, password, currency = 'INR' }) => {
   // Check if email already registered
   const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email.toLowerCase().trim()]);
   if (existing.length > 0) {

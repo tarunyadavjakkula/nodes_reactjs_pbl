@@ -20,7 +20,7 @@ export const ProfilePage = () => {
           <h2 className="text-base font-bold text-slate-900 dark:text-white">{user?.name}</h2>
           <p className="text-xs text-slate-500">{user?.email}</p>
           <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-[11px] font-semibold">
-            {user?.currency || 'USD'} Account
+            {user?.currency || 'INR'} Account
           </div>
         </div>
 

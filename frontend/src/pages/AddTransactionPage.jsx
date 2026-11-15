@@ -185,7 +185,7 @@ export const AddTransactionPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Amount ({user?.currency || 'USD'}) <span className="text-rose-500">*</span>
+                Amount ({user?.currency || 'INR'}) <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <input

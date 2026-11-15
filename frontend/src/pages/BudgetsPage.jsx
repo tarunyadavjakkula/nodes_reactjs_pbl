@@ -368,7 +368,7 @@ export const BudgetsPage = () => {
 
               <div>
                 <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Monthly Cap ({user?.currency || 'USD'})
+                  Monthly Cap ({user?.currency || 'INR'})
                 </label>
                 <input
                   type="number"

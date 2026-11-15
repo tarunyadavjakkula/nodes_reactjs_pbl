@@ -350,7 +350,7 @@ export const SavingsGoalsPage = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                    Target ({user?.currency || 'USD'}) <span className="text-rose-500">*</span>
+                    Target ({user?.currency || 'INR'}) <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -365,7 +365,7 @@ export const SavingsGoalsPage = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                    Initial Deposit ({user?.currency || 'USD'})
+                    Initial Deposit ({user?.currency || 'INR'})
                   </label>
                   <input
                     type="number"
@@ -469,7 +469,7 @@ export const SavingsGoalsPage = () => {
             <form onSubmit={handleContribute} className="space-y-4">
               <div>
                 <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Deposit Amount ({user?.currency || 'USD'})
+                  Deposit Amount ({user?.currency || 'INR'})
                 </label>
                 <input
                   type="number"

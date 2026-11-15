@@ -64,7 +64,7 @@ export const Navbar = ({ toggleSidebar }) => {
                 {user?.name || 'User'}
               </span>
               <span className="text-[10px] text-slate-500 dark:text-slate-400">
-                {user?.currency || 'USD'} Account
+                {user?.currency || 'INR'} Account
               </span>
             </div>
             <ChevronDown className="w-4 h-4 text-slate-400" />

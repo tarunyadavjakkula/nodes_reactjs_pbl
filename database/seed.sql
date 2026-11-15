@@ -38,7 +38,7 @@ INSERT INTO categories (id, user_id, name, type, icon, color, is_default) VALUES
 -- 2. Insert Demo User (Email: demo@spendwise.com | Password: password123)
 -- bcrypt hash for 'password123' with 10 rounds:
 INSERT INTO users (id, name, email, password, currency, theme) VALUES
-(1, 'Alex Morgan', 'demo@spendwise.com', '$2a$10$8YFT76TPXPmMHtcqGhR4d.b8gc8Z6zB0vP/rUlKt8tj0GK/da.8x.', 'USD', 'light');
+(1, 'Alex Morgan', 'demo@spendwise.com', '$2a$10$8YFT76TPXPmMHtcqGhR4d.b8gc8Z6zB0vP/rUlKt8tj0GK/da.8x.', 'INR', 'light');
 
 -- 3. Insert User Specific Custom Categories for User 1
 INSERT INTO categories (id, user_id, name, type, icon, color, is_default) VALUES

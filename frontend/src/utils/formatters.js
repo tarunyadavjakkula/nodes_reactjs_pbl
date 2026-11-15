@@ -9,13 +9,13 @@ export const CURRENCY_SYMBOLS = {
   CNY: '¥',
 };
 
-export const getCurrencySymbol = (currency = 'USD') => {
-  return CURRENCY_SYMBOLS[currency?.toUpperCase()] || currency || '$';
+export const getCurrencySymbol = (currency = 'INR') => {
+  return CURRENCY_SYMBOLS[currency?.toUpperCase()] || currency || '₹';
 };
 
-export const formatCurrency = (amount, currency = 'USD') => {
+export const formatCurrency = (amount, currency = 'INR') => {
   const value = Number(amount) || 0;
-  const curr = (currency || 'USD').toUpperCase();
+  const curr = (currency || 'INR').toUpperCase();
 
   const localeMap = {
     INR: 'en-IN',
