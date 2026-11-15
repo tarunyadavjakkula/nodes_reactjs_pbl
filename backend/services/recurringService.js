@@ -33,7 +33,9 @@ export const getRecurringTransactions = async (userId) => {
 };
 
 export const createRecurringTransaction = async (userId, data) => {
-  const { title, amount, type, category_id, frequency, start_date, description = '' } = data;
+  const { title, amount, type, frequency, description = '' } = data;
+  const category_id = data.category_id || data.categoryId || data.category;
+  const start_date = data.start_date || data.startDate;
 
   if (!title || !title.trim()) {
     const error = new Error('Title is required.');

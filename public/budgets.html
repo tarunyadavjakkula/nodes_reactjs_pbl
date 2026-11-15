@@ -108,9 +108,13 @@
 
     async function loadCategories() {
       const res = await apiRequest('/categories');
-      if (res && res.success) {
+      if (res && res.success && Array.isArray(res.data)) {
         const select = document.getElementById('budgetCategory');
-        select.innerHTML = res.data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        // Filter to expense categories only because budgets apply to expenses
+        const expenseCategories = res.data.filter(c => c.type === 'expense');
+        select.innerHTML = expenseCategories.map((c, i) => 
+          `<option value="${c.id}" ${i === 0 ? 'selected' : ''}>${escapeHtml(c.name)}</option>`
+        ).join('');
       }
     }
 
@@ -177,14 +181,27 @@
       const warningThreshold = parseFloat(document.getElementById('budgetThreshold').value);
       const month = monthPicker.value;
 
+      if (!categoryId || isNaN(categoryId)) {
+        alert('Please select an expense category.');
+        return;
+      }
+
       const res = await apiRequest('/budgets', {
         method: 'POST',
-        body: JSON.stringify({ categoryId, amount, month, warningThreshold })
+        body: JSON.stringify({
+          categoryId,
+          category_id: categoryId,
+          amount,
+          month,
+          warningThreshold,
+          warning_threshold: warningThreshold
+        })
       });
 
       if (res && res.success) {
         closeAddBudgetModal();
         document.getElementById('budgetForm').reset();
+        document.getElementById('budgetThreshold').value = '80';
         loadBudgets();
       } else {
         alert(res?.message || 'Failed to set budget');

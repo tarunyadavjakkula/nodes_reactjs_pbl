@@ -46,7 +46,9 @@ export const getGoals = async (userId) => {
 };
 
 export const createGoal = async (userId, data) => {
-  const { title, target_amount, current_amount = 0, deadline, category = 'General', color = '#6366F1' } = data;
+  const { title, deadline, category = 'General', color = '#6366F1' } = data;
+  const target_amount = data.target_amount || data.targetAmount;
+  const current_amount = data.current_amount || data.currentAmount || 0;
 
   if (!title || !title.trim()) {
     const error = new Error('Goal title is required.');

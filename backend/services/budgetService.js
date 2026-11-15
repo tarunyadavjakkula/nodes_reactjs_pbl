@@ -77,7 +77,12 @@ export const getBudgets = async (userId, month = null) => {
   };
 };
 
-export const createOrUpdateBudget = async (userId, { category_id, month, amount, warning_threshold = 80 }) => {
+export const createOrUpdateBudget = async (userId, data) => {
+  const category_id = data.category_id || data.categoryId || data.category;
+  const month = data.month;
+  const amount = data.amount;
+  const warning_threshold = data.warning_threshold || data.warningThreshold || 80;
+
   if (!category_id) {
     const error = new Error('Category is required.');
     error.statusCode = 400;
