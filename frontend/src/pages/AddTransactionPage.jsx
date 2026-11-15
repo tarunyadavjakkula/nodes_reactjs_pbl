@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import {
   ArrowLeft,
   PlusCircle,
-  ScanLine,
-  Upload,
-  CheckCircle,
-  Loader2,
   Calendar,
   CreditCard,
   Tag,
   DollarSign,
   FileText,
+  Loader2,
 } from 'lucide-react';
-import Tesseract from 'tesseract.js';
 
 export const AddTransactionPage = () => {
   const navigate = useNavigate();
@@ -36,12 +32,6 @@ export const AddTransactionPage = () => {
     payment_method: 'Credit Card',
     description: '',
   });
-
-  // Receipt Scanner State
-  const [scanning, setScanning] = useState(false);
-  const [scanProgress, setScanProgress] = useState(0);
-  const [scanStatus, setScanStatus] = useState('');
-  const [scanSuccess, setScanSuccess] = useState(false);
 
   useEffect(() => {
     const fetchCats = async () => {
@@ -114,68 +104,6 @@ export const AddTransactionPage = () => {
     }
   };
 
-  // Smart Receipt OCR & Auto-fill
-  const handleReceiptUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setScanning(true);
-    setScanProgress(0);
-    setScanStatus('Initializing OCR engine...');
-    setScanSuccess(false);
-    setError('');
-
-    try {
-      // 1. Client-side OCR using Tesseract.js
-      const { data: { text } } = await Tesseract.recognize(file, 'eng', {
-        logger: (m) => {
-          if (m.status === 'recognizing text') {
-            setScanProgress(Math.round(m.progress * 100));
-            setScanStatus(`Scanning receipt: ${Math.round(m.progress * 100)}%`);
-          } else {
-            setScanStatus(m.status);
-          }
-        },
-      });
-
-      setScanStatus('Analyzing receipt data...');
-
-      // 2. Send parsed OCR text to smart receipt endpoint
-      const res = await api.post('/receipts/scan', { text });
-      if (res.success && res.data) {
-        const parsed = res.data;
-
-        // Find matching category ID if available
-        let matchedCatId = formData.category_id;
-        if (parsed.category) {
-          const found = categories.find(
-            (c) => c.name.toLowerCase() === parsed.category.toLowerCase()
-          );
-          if (found) matchedCatId = found.id;
-        }
-
-        setFormData((prev) => ({
-          ...prev,
-          title: parsed.merchant || prev.title || 'Scanned Receipt',
-          amount: parsed.amount ? parsed.amount.toString() : prev.amount,
-          date: parsed.date || prev.date,
-          category_id: matchedCatId,
-          payment_method: parsed.payment_method || prev.payment_method,
-          description: `Auto-scanned receipt from ${parsed.merchant || 'Store'}. Items: ${
-            parsed.items?.map((i) => `${i.name} ($${i.price})`).join(', ') || 'N/A'
-          }`,
-        }));
-
-        setScanSuccess(true);
-      }
-    } catch (err) {
-      console.error('OCR scanning error:', err);
-      setError('Could not scan receipt. Please enter transaction details manually.');
-    } finally {
-      setScanning(false);
-    }
-  };
-
   const filteredCategories = categories.filter((c) => c.type === formData.type);
 
   return (
@@ -186,57 +114,6 @@ export const AddTransactionPage = () => {
       >
         <ArrowLeft className="w-4 h-4" /> Back to Transactions
       </button>
-
-      {/* Smart Receipt Scanner Card */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/20 border border-indigo-100 dark:border-indigo-900/50 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/30">
-              <ScanLine className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Smart Receipt Scanner</h3>
-              <p className="text-xs text-slate-500">
-                Upload a bill or receipt to automatically extract merchant, date, and amount.
-              </p>
-            </div>
-          </div>
-
-          <label className="cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all shrink-0">
-            <Upload className="w-4 h-4" />
-            <span>Upload Receipt</span>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleReceiptUpload}
-              disabled={scanning}
-            />
-          </label>
-        </div>
-
-        {scanning && (
-          <div className="mt-4 p-3 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-indigo-100 dark:border-indigo-900/50">
-            <div className="flex items-center gap-2 text-xs text-indigo-600 font-medium mb-1.5">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>{scanStatus}</span>
-            </div>
-            <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-              <div
-                className="bg-indigo-600 h-1.5 transition-all duration-300 rounded-full"
-                style={{ width: `${scanProgress}%` }}
-              />
-            </div>
-          </div>
-        )}
-
-        {scanSuccess && (
-          <div className="mt-3 flex items-center gap-2 text-xs font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-2 rounded-xl">
-            <CheckCircle className="w-4 h-4" />
-            <span>Receipt scanned successfully! Details have been auto-populated below.</span>
-          </div>
-        )}
-      </div>
 
       {/* Main Form */}
       <div className="p-6 md:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">

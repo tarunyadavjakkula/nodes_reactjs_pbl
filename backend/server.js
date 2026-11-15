@@ -1,14 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { apiLimiter } from './middleware/rateLimiter.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { testConnection } from './config/db.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Route imports
 import healthRoutes from './routes/healthRoutes.js';
@@ -20,7 +15,6 @@ import analyticsRoutes from './routes/analyticsRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import recurringRoutes from './routes/recurringRoutes.js';
 import goalRoutes from './routes/goalRoutes.js';
-import receiptRoutes from './routes/receiptRoutes.js';
 
 dotenv.config();
 
@@ -65,14 +59,25 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/recurring', recurringRoutes);
 app.use('/api/goals', goalRoutes);
-app.use('/api/receipts', receiptRoutes);
 
-// Serve pure HTML/CSS/JS frontend statically
-app.use(express.static(path.join(__dirname, '../public')));
-
-// Root route serves landing index.html
+// Root informational endpoint
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+  res.json({
+    name: 'SpendWise API Server',
+    tagline: 'Track Smart. Spend Better. Save More.',
+    status: 'ACTIVE',
+    docs: '/api/health',
+    modules: [
+      'auth',
+      'categories',
+      'transactions',
+      'budgets',
+      'analytics',
+      'reports',
+      'recurring',
+      'notifications'
+    ]
+  });
 });
 
 // Centralized error handling middleware

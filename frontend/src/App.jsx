@@ -13,7 +13,6 @@ import DashboardPage from './pages/DashboardPage';
 import TransactionsPage from './pages/TransactionsPage';
 import AddTransactionPage from './pages/AddTransactionPage';
 import EditTransactionPage from './pages/EditTransactionPage';
-import ReceiptScannerPage from './pages/ReceiptScannerPage';
 import BudgetsPage from './pages/BudgetsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import SavingsGoalsPage from './pages/SavingsGoalsPage';
@@ -42,7 +41,6 @@ function App() {
         <Route path="/transactions" element={<TransactionsPage />} />
         <Route path="/transactions/add" element={<AddTransactionPage />} />
         <Route path="/transactions/edit/:id" element={<EditTransactionPage />} />
-        <Route path="/receipt-scanner" element={<ReceiptScannerPage />} />
         <Route path="/budgets" element={<BudgetsPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/goals" element={<SavingsGoalsPage />} />

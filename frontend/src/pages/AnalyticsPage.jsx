@@ -4,31 +4,39 @@ import api from '../services/api';
 import { formatCurrency } from '../utils/formatters';
 import {
   PieChart as PieChartIcon,
-  TrendingUp,
-  TrendingDown,
-  Calendar,
-  Sparkles,
   BarChart3,
   Activity,
   Loader2,
-  AlertCircle,
   Lightbulb,
 } from 'lucide-react';
 import {
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
+  Chart as ChartJS,
+  ArcElement,
   Tooltip,
   Legend,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  AreaChart,
-  Area,
-} from 'recharts';
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  PointElement,
+  LineElement,
+  Title,
+  Filler,
+} from 'chart.js';
+import { Doughnut, Bar, Line } from 'react-chartjs-2';
+
+// Register Chart.js components
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  PointElement,
+  LineElement,
+  Title,
+  Filler
+);
 
 export const AnalyticsPage = () => {
   const { user } = useAuth();
@@ -42,7 +50,18 @@ export const AnalyticsPage = () => {
   const [dailyTrends, setDailyTrends] = useState([]);
   const [insights, setInsights] = useState([]);
 
-  const COLORS = ['#6366F1', '#EC4899', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EF4444', '#14B8A6'];
+  const COLORS = [
+    '#6366F1',
+    '#EC4899',
+    '#F59E0B',
+    '#10B981',
+    '#3B82F6',
+    '#8B5CF6',
+    '#EF4444',
+    '#14B8A6',
+    '#F97316',
+    '#06B6D4',
+  ];
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -77,23 +96,139 @@ export const AnalyticsPage = () => {
     fetchAnalytics();
   }, [month]);
 
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800 shadow-xl border border-slate-100 dark:border-slate-700 text-xs">
-          <p className="font-bold text-slate-900 dark:text-white mb-1">{label || payload[0].name}</p>
-          {payload.map((entry, index) => (
-            <p key={`item-${index}`} className="flex items-center gap-2" style={{ color: entry.color }}>
-              <span>{entry.name}:</span>
-              <span className="font-mono font-semibold">
-                {formatCurrency(entry.value, user?.currency)}
-              </span>
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
+  // Chart.js Category Breakdown Doughnut configuration
+  const doughnutChartData = {
+    labels: categoryData.map((c) => c.name),
+    datasets: [
+      {
+        data: categoryData.map((c) => c.value),
+        backgroundColor: categoryData.map(
+          (c, i) => c.color || COLORS[i % COLORS.length]
+        ),
+        borderWidth: 2,
+        borderColor: '#ffffff',
+      },
+    ],
+  };
+
+  const doughnutOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const val = context.raw || 0;
+            return ` ${context.label}: ${formatCurrency(val, user?.currency)}`;
+          },
+        },
+      },
+    },
+    cutout: '65%',
+  };
+
+  // Chart.js Monthly Trends Bar configuration
+  const barChartData = {
+    labels: monthlyTrends.map((m) => m.month),
+    datasets: [
+      {
+        label: 'Income',
+        data: monthlyTrends.map((m) => m.income),
+        backgroundColor: '#10B981',
+        borderRadius: 4,
+      },
+      {
+        label: 'Expense',
+        data: monthlyTrends.map((m) => m.expense),
+        backgroundColor: '#EF4444',
+        borderRadius: 4,
+      },
+    ],
+  };
+
+  const barOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          boxWidth: 12,
+          font: { size: 11 },
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            return ` ${context.dataset.label}: ${formatCurrency(
+              context.raw || 0,
+              user?.currency
+            )}`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { font: { size: 10 } },
+      },
+      y: {
+        grid: { color: 'rgba(148, 163, 184, 0.15)' },
+        ticks: {
+          font: { size: 10 },
+          callback: (value) => (value >= 1000 ? `${value / 1000}k` : value),
+        },
+      },
+    },
+  };
+
+  // Chart.js Daily Velocity Line configuration
+  const lineChartData = {
+    labels: dailyTrends.map((d) => d.date?.slice(8) || ''),
+    datasets: [
+      {
+        label: 'Expense',
+        data: dailyTrends.map((d) => d.expense),
+        borderColor: '#6366F1',
+        backgroundColor: 'rgba(99, 102, 241, 0.15)',
+        tension: 0.35,
+        fill: true,
+        pointRadius: 2,
+        pointHoverRadius: 5,
+      },
+    ],
+  };
+
+  const lineOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            return ` Expense: ${formatCurrency(context.raw || 0, user?.currency)}`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { font: { size: 10 } },
+      },
+      y: {
+        grid: { color: 'rgba(148, 163, 184, 0.15)' },
+        ticks: {
+          font: { size: 10 },
+          callback: (value) => (value >= 1000 ? `${value / 1000}k` : value),
+        },
+      },
+    },
   };
 
   return (
@@ -105,7 +240,7 @@ export const AnalyticsPage = () => {
             Spending Analytics
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Visual breakdown of your financial flows and automated spending trends.
+            Visual breakdown of your financial flows powered by Chart.js.
           </p>
         </div>
 
@@ -141,8 +276,12 @@ export const AnalyticsPage = () => {
                     key={idx}
                     className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-indigo-100 dark:border-indigo-900/40 shadow-sm"
                   >
-                    <p className="text-xs font-bold text-slate-900 dark:text-white">{ins.title}</p>
-                    <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">{ins.message}</p>
+                    <p className="text-xs font-bold text-slate-900 dark:text-white">
+                      {ins.title}
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                      {ins.message}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -151,7 +290,7 @@ export const AnalyticsPage = () => {
 
           {/* Charts Row 1: Category Breakdown & Monthly Comparison */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Category Breakdown (Donut) */}
+            {/* Category Breakdown (Chart.js Doughnut) */}
             <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -166,28 +305,7 @@ export const AnalyticsPage = () => {
               {categoryData.length > 0 ? (
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
                   <div className="w-full sm:w-1/2 h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={categoryData}
-                          dataKey="value"
-                          nameKey="name"
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={55}
-                          outerRadius={85}
-                          paddingAngle={3}
-                        >
-                          {categoryData.map((entry, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={entry.color || COLORS[index % COLORS.length]}
-                            />
-                          ))}
-                        </Pie>
-                        <Tooltip content={<CustomTooltip />} />
-                      </PieChart>
-                    </ResponsiveContainer>
+                    <Doughnut data={doughnutChartData} options={doughnutOptions} />
                   </div>
 
                   <div className="w-full sm:w-1/2 space-y-2 overflow-y-auto max-h-60 pr-2">
@@ -196,7 +314,9 @@ export const AnalyticsPage = () => {
                         <div className="flex items-center gap-2 truncate">
                           <span
                             className="w-2.5 h-2.5 rounded-full shrink-0"
-                            style={{ backgroundColor: c.color || COLORS[i % COLORS.length] }}
+                            style={{
+                              backgroundColor: c.color || COLORS[i % COLORS.length],
+                            }}
                           />
                           <span className="text-slate-700 dark:text-slate-300 truncate font-medium">
                             {c.name}
@@ -206,7 +326,9 @@ export const AnalyticsPage = () => {
                           <span className="font-semibold text-slate-900 dark:text-white font-mono">
                             {formatCurrency(c.value, user?.currency)}
                           </span>
-                          <span className="text-[10px] text-slate-400 ml-1.5">({c.percentage}%)</span>
+                          <span className="text-[10px] text-slate-400 ml-1.5">
+                            ({c.percentage}%)
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -219,7 +341,7 @@ export const AnalyticsPage = () => {
               )}
             </div>
 
-            {/* Monthly Trends (Income vs Expense Bar Chart) */}
+            {/* Monthly Trends (Chart.js Bar Chart) */}
             <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -233,20 +355,7 @@ export const AnalyticsPage = () => {
 
               {monthlyTrends.length > 0 ? (
                 <div className="h-64 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={monthlyTrends}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.15} />
-                      <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                      <YAxis
-                        tick={{ fontSize: 10 }}
-                        tickFormatter={(v) => (v >= 1000 ? `${v / 1000}k` : v)}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend wrapperStyle={{ fontSize: 11 }} />
-                      <Bar dataKey="income" name="Income" fill="#10B981" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="expense" name="Expense" fill="#EF4444" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <Bar data={barChartData} options={barOptions} />
                 </div>
               ) : (
                 <div className="py-20 text-center text-xs text-slate-500">
@@ -256,50 +365,21 @@ export const AnalyticsPage = () => {
             </div>
           </div>
 
-          {/* Charts Row 2: Daily Spending Flow (Area Chart) */}
+          {/* Charts Row 2: Daily Spending Flow (Chart.js Line Chart) */}
           <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                   Daily Spending Velocity
                 </h3>
-                <p className="text-xs text-slate-500">Expense and income spikes through {month}</p>
+                <p className="text-xs text-slate-500">Expense spikes through {month}</p>
               </div>
               <Activity className="w-4 h-4 text-slate-400" />
             </div>
 
             {dailyTrends.length > 0 ? (
               <div className="h-64 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={dailyTrends}>
-                    <defs>
-                      <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6366F1" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="#6366F1" stopOpacity={0.0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.15} />
-                    <XAxis
-                      dataKey="date"
-                      tick={{ fontSize: 10 }}
-                      tickFormatter={(d) => d.slice(8)}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 10 }}
-                      tickFormatter={(v) => (v >= 1000 ? `${v / 1000}k` : v)}
-                    />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Area
-                      type="monotone"
-                      dataKey="expense"
-                      name="Expense"
-                      stroke="#6366F1"
-                      fillOpacity={1}
-                      fill="url(#expenseGradient)"
-                      strokeWidth={2}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+                <Line data={lineChartData} options={lineOptions} />
               </div>
             ) : (
               <div className="py-16 text-center text-xs text-slate-500">
