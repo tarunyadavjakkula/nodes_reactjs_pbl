@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports - SpendWise</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-icon">💼</div><span>Spend<span>Wise</span></span></div>
+      <nav class="nav-links">
+        <a href="/dashboard.html" class="nav-item">📊 Dashboard</a>
+        <a href="/transactions.html" class="nav-item">💳 Transactions</a>
+        <a href="/receipt-scanner.html" class="nav-item">📷 Receipt Scanner</a>
+        <a href="/budgets.html" class="nav-item">🎯 Budgets</a>
+        <a href="/analytics.html" class="nav-item">📈 Analytics</a>
+        <a href="/goals.html" class="nav-item">🏆 Savings Goals</a>
+        <a href="/recurring.html" class="nav-item">🔄 Recurring Bills</a>
+        <a href="/reports.html" class="nav-item active">📑 Reports</a>
+        <a href="/settings.html" class="nav-item">⚙️ Settings</a>
+      </nav>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar">
+        <div><span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">SpendWise v1.0 • Pure HTML</span></div>
+        <div class="topbar-right">
+          <button class="theme-toggle-btn" onclick="toggleTheme()">🌓</button>
+          <div class="user-pill"><div class="user-avatar" id="userAvatar">U</div><span id="userNameDisplay">User</span></div>
+          <button class="btn-signout" onclick="logout()">Sign Out</button>
+        </div>
+      </header>
+
+      <main class="content-body">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Financial Reports</h1>
+            <p class="page-subtitle">Generate statements, view summaries, and export CSV spreadsheets</p>
+          </div>
+          <div>
+            <button class="btn-primary" onclick="exportCSV()">📥 Export CSV</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 24px;">
+          <div style="display: flex; gap: 16px; align-items: center;">
+            <label class="form-label" style="margin: 0;">Period:</label>
+            <select id="reportPeriod" class="form-select" style="max-width: 200px;">
+              <option value="monthly" selected>This Month</option>
+              <option value="quarterly">This Quarter</option>
+              <option value="yearly">This Year</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-cards" style="margin-bottom: 24px;">
+          <div class="card">
+            <div class="card-title">Total Inflow</div>
+            <div class="card-value" id="repIncome" style="color: var(--success);">₹ 0.00</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Total Outflow</div>
+            <div class="card-value" id="repExpense" style="color: var(--danger);">₹ 0.00</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Net Savings</div>
+            <div class="card-value" id="repNet">₹ 0.00</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom: 16px;">Category Expenditure Breakdown</h3>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Transaction Count</th>
+                  <th>Total Spent</th>
+                </tr>
+              </thead>
+              <tbody id="categoryReportTable">
+                <tr><td colspan="3" style="text-align: center; padding: 24px;">Loading breakdown...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    requireAuth();
+    renderTopbarUser();
+
+    const periodSelect = document.getElementById('reportPeriod');
+
+    async function loadReport() {
+      const period = periodSelect.value;
+      const res = await apiRequest(`/reports?period=${period}`);
+      if (res && res.success && res.data) {
+        const s = res.data.summary;
+        document.getElementById('repIncome').textContent = formatCurrency(s.totalIncome);
+        document.getElementById('repExpense').textContent = formatCurrency(s.totalExpense);
+        document.getElementById('repNet').textContent = formatCurrency(s.netSavings);
+
+        const tbody = document.getElementById('categoryReportTable');
+        if (res.data.categoryBreakdown && res.data.categoryBreakdown.length > 0) {
+          tbody.innerHTML = res.data.categoryBreakdown.map(c => `
+            <tr>
+              <td><strong>${escapeHtml(c.category)}</strong></td>
+              <td>${c.transactionCount || 1}</td>
+              <td style="font-weight: 700; color: var(--danger);">${formatCurrency(c.total)}</td>
+            </tr>
+          `).join('');
+        } else {
+          tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--text-muted);">No category expenditures for this period.</td></tr>';
+        }
+      }
+    }
+
+    function exportCSV() {
+      const token = getToken();
+      const period = periodSelect.value;
+      window.open(`/api/reports/export-csv?period=${period}&token=${token}`, '_blank');
+    }
+
+    periodSelect.addEventListener('change', loadReport);
+    loadReport();
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+  </script>
+</body>
+</html>

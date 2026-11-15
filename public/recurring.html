@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recurring Bills - SpendWise</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-icon">💼</div><span>Spend<span>Wise</span></span></div>
+      <nav class="nav-links">
+        <a href="/dashboard.html" class="nav-item">📊 Dashboard</a>
+        <a href="/transactions.html" class="nav-item">💳 Transactions</a>
+        <a href="/receipt-scanner.html" class="nav-item">📷 Receipt Scanner</a>
+        <a href="/budgets.html" class="nav-item">🎯 Budgets</a>
+        <a href="/analytics.html" class="nav-item">📈 Analytics</a>
+        <a href="/goals.html" class="nav-item">🏆 Savings Goals</a>
+        <a href="/recurring.html" class="nav-item active">🔄 Recurring Bills</a>
+        <a href="/reports.html" class="nav-item">📑 Reports</a>
+        <a href="/settings.html" class="nav-item">⚙️ Settings</a>
+      </nav>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar">
+        <div><span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">SpendWise v1.0 • Pure HTML</span></div>
+        <div class="topbar-right">
+          <button class="theme-toggle-btn" onclick="toggleTheme()">🌓</button>
+          <div class="user-pill"><div class="user-avatar" id="userAvatar">U</div><span id="userNameDisplay">User</span></div>
+          <button class="btn-signout" onclick="logout()">Sign Out</button>
+        </div>
+      </header>
+
+      <main class="content-body">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Recurring Bills & Subscriptions</h1>
+            <p class="page-subtitle">Automate regular bills, monthly salaries, and recurring commitments</p>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <button class="btn-secondary" onclick="processDueToday()">⚡ Process Due Today</button>
+            <button class="btn-primary" onclick="openRecurringModal()">+ Add Schedule</button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Frequency</th>
+                <th>Type</th>
+                <th>Next Due Date</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="recurringTableBody">
+              <tr><td colspan="7" style="text-align: center; padding: 30px;">Loading recurring items...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add Recurring Modal -->
+  <div id="recModal" class="modal-overlay">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1.15rem; font-weight: 700;">Add Recurring Bill / Income</h3>
+        <button onclick="closeRecurringModal()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer;">✕</button>
+      </div>
+
+      <form id="recurringForm">
+        <div class="form-group">
+          <label class="form-label">Title</label>
+          <input type="text" id="recTitle" class="form-input" required placeholder="e.g. WiFi Bill, Netflix, Rent">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount</label>
+          <input type="number" step="0.01" id="recAmount" class="form-input" required placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <select id="recType" class="form-select">
+            <option value="expense">Expense</option>
+            <option value="income">Income</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Frequency</label>
+          <select id="recFreq" class="form-select">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly" selected>Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select id="recCategory" class="form-select" required></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Start Date</label>
+          <input type="date" id="recStartDate" class="form-input" required>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn-secondary" onclick="closeRecurringModal()">Cancel</button>
+          <button type="submit" class="btn-primary">Save Schedule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    requireAuth();
+    renderTopbarUser();
+
+    document.getElementById('recStartDate').value = new Date().toISOString().split('T')[0];
+
+    async function loadCategories() {
+      const res = await apiRequest('/categories');
+      if (res && res.success) {
+        document.getElementById('recCategory').innerHTML = res.data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      }
+    }
+
+    async function loadRecurring() {
+      const tbody = document.getElementById('recurringTableBody');
+      const res = await apiRequest('/recurring');
+      if (res && res.success && res.data.length > 0) {
+        tbody.innerHTML = res.data.map(r => `
+          <tr>
+            <td><strong>${escapeHtml(r.title)}</strong></td>
+            <td style="text-transform: capitalize;">${r.frequency}</td>
+            <td><span class="badge badge-${r.type}">${r.type}</span></td>
+            <td>${r.next_date || r.start_date}</td>
+            <td style="font-weight: 700;">${formatCurrency(r.amount)}</td>
+            <td><span class="badge" style="background: rgba(99, 102, 241, 0.15); color: var(--primary);">${r.status}</span></td>
+            <td style="text-align: right;">
+              <button onclick="deleteRecurring(${r.id})" style="background: none; border: none; color: var(--danger); cursor: pointer; font-weight: 600;">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+      } else {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">No recurring schedules setup yet.</td></tr>`;
+      }
+    }
+
+    async function deleteRecurring(id) {
+      if (confirm('Delete this recurring schedule?')) {
+        await apiRequest(`/recurring/${id}`, { method: 'DELETE' });
+        loadRecurring();
+      }
+    }
+
+    async function processDueToday() {
+      const res = await apiRequest('/recurring/process', { method: 'POST' });
+      if (res && res.success) {
+        alert(res.message || 'Processed recurring bills due today.');
+        loadRecurring();
+      }
+    }
+
+    function openRecurringModal() {
+      document.getElementById('recModal').classList.add('open');
+    }
+    function closeRecurringModal() {
+      document.getElementById('recModal').classList.remove('open');
+    }
+
+    document.getElementById('recurringForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('recTitle').value;
+      const amount = parseFloat(document.getElementById('recAmount').value);
+      const type = document.getElementById('recType').value;
+      const frequency = document.getElementById('recFreq').value;
+      const category_id = parseInt(document.getElementById('recCategory').value);
+      const start_date = document.getElementById('recStartDate').value;
+
+      const res = await apiRequest('/recurring', {
+        method: 'POST',
+        body: JSON.stringify({ title, amount, type, frequency, category_id, start_date })
+      });
+
+      if (res && res.success) {
+        closeRecurringModal();
+        document.getElementById('recurringForm').reset();
+        loadRecurring();
+      } else {
+        alert(res?.message || 'Failed to save recurring bill');
+      }
+    });
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+    loadCategories();
+    loadRecurring();
+  </script>
+</body>
+</html>

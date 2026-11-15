@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - SpendWise</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">💼</div>
+        <span>Spend<span>Wise</span></span>
+      </div>
+      <nav class="nav-links">
+        <a href="/dashboard.html" class="nav-item active">📊 Dashboard</a>
+        <a href="/transactions.html" class="nav-item">💳 Transactions</a>
+        <a href="/receipt-scanner.html" class="nav-item">📷 Receipt Scanner</a>
+        <a href="/budgets.html" class="nav-item">🎯 Budgets</a>
+        <a href="/analytics.html" class="nav-item">📈 Analytics</a>
+        <a href="/goals.html" class="nav-item">🏆 Savings Goals</a>
+        <a href="/recurring.html" class="nav-item">🔄 Recurring Bills</a>
+        <a href="/reports.html" class="nav-item">📑 Reports</a>
+        <a href="/settings.html" class="nav-item">⚙️ Settings</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div>
+          <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
+            SpendWise v1.0 • Pure HTML / JS Architecture
+          </span>
+        </div>
+        <div class="topbar-right">
+          <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌓</button>
+          <div class="user-pill">
+            <div class="user-avatar" id="userAvatar">U</div>
+            <span id="userNameDisplay">User</span>
+          </div>
+          <button class="btn-signout" onclick="logout()">Sign Out</button>
+        </div>
+      </header>
+
+      <!-- Content Body -->
+      <main class="content-body">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Financial Dashboard</h1>
+            <p class="page-subtitle">Your real-time net worth, balance, and cashflow summary</p>
+          </div>
+          <div>
+            <a href="/transactions.html" class="btn-primary">+ Add Transaction</a>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="grid-cards">
+          <div class="card">
+            <div class="card-title">Available Balance</div>
+            <div class="card-value" id="netBalance" style="color: var(--primary);">₹ 0.00</div>
+            <div class="card-sub">Net Liquid Balance</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Total Income</div>
+            <div class="card-value" id="totalIncome" style="color: var(--success);">₹ 0.00</div>
+            <div class="card-sub">All Inflows</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Total Expenses</div>
+            <div class="card-value" id="totalExpense" style="color: var(--danger);">₹ 0.00</div>
+            <div class="card-sub">All Outflows</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Savings Rate</div>
+            <div class="card-value" id="savingsRate">0%</div>
+            <div class="card-sub">Income Retained</div>
+          </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="card" style="margin-top: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="font-size: 1.1rem; font-weight: 700;">Recent Transactions</h3>
+            <a href="/transactions.html" style="font-size: 0.85rem; color: var(--primary); font-weight: 600;">View All →</a>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Payment Method</th>
+                  <th>Date</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody id="recentTransactionsTable">
+                <tr>
+                  <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                    Loading recent transactions...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    requireAuth();
+    renderTopbarUser();
+
+    async function loadDashboard() {
+      try {
+        const [summaryRes, txRes] = await Promise.all([
+          apiRequest('/transactions/summary'),
+          apiRequest('/transactions?limit=5&sortBy=date&sortOrder=DESC')
+        ]);
+
+        if (summaryRes && summaryRes.success) {
+          const s = summaryRes.data;
+          document.getElementById('netBalance').textContent = formatCurrency(s.availableBalance);
+          document.getElementById('totalIncome').textContent = formatCurrency(s.totalIncome);
+          document.getElementById('totalExpense').textContent = formatCurrency(s.totalExpense);
+          document.getElementById('savingsRate').textContent = `${s.savingsRate || 0}%`;
+        }
+
+        const tbody = document.getElementById('recentTransactionsTable');
+        if (txRes && txRes.success && txRes.data.transactions.length > 0) {
+          tbody.innerHTML = txRes.data.transactions.map(t => `
+            <tr>
+              <td><strong>${escapeHtml(t.title)}</strong></td>
+              <td>${escapeHtml(t.category_name || 'General')}</td>
+              <td>${escapeHtml(t.payment_method || 'Cash')}</td>
+              <td>${t.date}</td>
+              <td style="font-weight: 700; color: ${t.type === 'income' ? 'var(--success)' : 'var(--danger)'};">
+                ${t.type === 'income' ? '+' : '-'} ${formatCurrency(t.amount)}
+              </td>
+            </tr>
+          `).join('');
+        } else {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: var(--text-muted);">No transactions recorded yet.</td></tr>`;
+        }
+      } catch (err) {
+        console.error('Error loading dashboard:', err);
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>
