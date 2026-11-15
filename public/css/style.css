@@ -383,3 +383,4 @@ tr:last-child td {
 .form-input:focus, .form-select:focus {
   border-color: var(--primary);
 }
+

@@ -164,25 +164,50 @@
 
     document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
 
+    let allCategories = [];
+
     async function loadCategories() {
       const res = await apiRequest('/categories');
-      if (res && res.success) {
-        const catFilter = document.getElementById('categorySelect');
-        const catModal = document.getElementById('txCategory');
-        
-        res.data.forEach(c => {
-          const opt1 = document.createElement('option');
-          opt1.value = c.id;
-          opt1.textContent = c.name;
-          catFilter.appendChild(opt1);
+      if (res && res.success && Array.isArray(res.data)) {
+        allCategories = res.data;
 
-          const opt2 = document.createElement('option');
-          opt2.value = c.id;
-          opt2.textContent = c.name;
-          catModal.appendChild(opt2);
+        // Populate filter dropdown
+        const catFilter = document.getElementById('categorySelect');
+        catFilter.innerHTML = '<option value="">All Categories</option>';
+        allCategories.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = `${c.name} (${c.type})`;
+          catFilter.appendChild(opt);
         });
+
+        // Populate modal with default 'expense' categories
+        updateCategoryOptions('expense');
       }
     }
+
+    function updateCategoryOptions(selectedType) {
+      const catModal = document.getElementById('txCategory');
+      catModal.innerHTML = '';
+
+      const filtered = allCategories.filter(c => c.type === selectedType);
+      const list = filtered.length > 0 ? filtered : allCategories;
+
+      list.forEach((c, index) => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.name;
+        if (index === 0) opt.selected = true;
+        catModal.appendChild(opt);
+      });
+    }
+
+    // Update categories when switching between Expense and Income
+    document.querySelectorAll('input[name="txType"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        updateCategoryOptions(e.target.value);
+      });
+    });
 
     async function loadTransactions() {
       const search = document.getElementById('searchInput').value;
@@ -229,6 +254,8 @@
 
     function openAddModal() {
       document.getElementById('addModal').classList.add('open');
+      const currentType = document.querySelector('input[name="txType"]:checked')?.value || 'expense';
+      updateCategoryOptions(currentType);
     }
 
     function closeAddModal() {
@@ -249,15 +276,30 @@
       const paymentMethod = document.getElementById('txPayment').value;
       const date = document.getElementById('txDate').value;
 
+      if (!categoryId || isNaN(categoryId)) {
+        alert('Please select a valid category');
+        return;
+      }
+
       const res = await apiRequest('/transactions', {
         method: 'POST',
-        body: JSON.stringify({ title, amount, type, categoryId, paymentMethod, date })
+        body: JSON.stringify({
+          title,
+          amount,
+          type,
+          categoryId,
+          category_id: categoryId,
+          paymentMethod,
+          payment_method: paymentMethod,
+          date
+        })
       });
 
       if (res && res.success) {
         closeAddModal();
         document.getElementById('transactionForm').reset();
         document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+        updateCategoryOptions('expense');
         loadTransactions();
       } else {
         alert(res?.message || 'Failed to save transaction');
@@ -274,3 +316,4 @@
   </script>
 </body>
 </html>
+

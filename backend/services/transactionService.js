@@ -196,7 +196,9 @@ export const getTransactionById = async (userId, transactionId) => {
 };
 
 export const createTransaction = async (userId, data) => {
-  const { title, amount, type, category_id, date, payment_method = 'Cash', description = '' } = data;
+  const { title, amount, type, date, description = '' } = data;
+  const category_id = data.category_id || data.categoryId || data.category;
+  const payment_method = data.payment_method || data.paymentMethod || 'Cash';
 
   if (!title || !title.trim()) {
     const error = new Error('Transaction title is required.');
@@ -261,7 +263,9 @@ export const updateTransaction = async (userId, transactionId, data) => {
   // Verify ownership
   await getTransactionById(userId, transactionId);
 
-  const { title, amount, type, category_id, date, payment_method, description } = data;
+  const { title, amount, type, date, description } = data;
+  const category_id = data.category_id || data.categoryId || data.category;
+  const payment_method = data.payment_method || data.paymentMethod;
   const updates = [];
   const params = [];
 

@@ -102,3 +102,4 @@ function renderTopbarUser() {
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
 });
+
