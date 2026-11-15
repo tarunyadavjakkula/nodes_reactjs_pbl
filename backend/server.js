@@ -75,7 +75,7 @@ app.get('/', (req, res) => {
       'analytics',
       'reports',
       'recurring',
-      'notifications'
+      'goals'
     ]
   });
 });
