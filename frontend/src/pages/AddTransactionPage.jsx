@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import {
@@ -220,17 +220,9 @@ export const AddTransactionPage = () => {
           {/* Category & Payment Method Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                  Category <span className="text-rose-500">*</span>
-                </label>
-                <Link
-                  to="/categories"
-                  className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
-                >
-                  + Manage Categories
-                </Link>
-              </div>
+              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                Category <span className="text-rose-500">*</span>
+              </label>
               <select
                 name="category_id"
                 value={formData.category_id}
